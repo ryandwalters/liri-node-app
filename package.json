@@ -1,0 +1,26 @@
+{
+  "name": "liri-node-app",
+  "version": "1.0.0",
+  "description": "liri node.js app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ryandwalters/liri-node-app.git"
+  },
+  "keywords": [],
+  "author": "Ryan Walters",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ryandwalters/liri-node-app/issues"
+  },
+  "homepage": "https://github.com/ryandwalters/liri-node-app#readme",
+  "dependencies": {
+    "dotenv": "^5.0.1",
+    "node-spotify-api": "^1.0.7",
+    "request": "file:node_modules/request",
+    "twitter": "^1.7.1"
+  }
+}
