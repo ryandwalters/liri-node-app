@@ -10,6 +10,13 @@ var OMDB = keys.omdb;
 var spotify = new spotify(keys.spotify);
 var client = new twitter(keys.twitter);
 
+var logText = function (text) {
+
+  console.log(text)
+  fs.appendFileSync("log.txt", text + "\n", "utf8");
+ 
+}
+
 //user input
 var cmdIn = process.argv[2];
 var searchStr = ""
@@ -23,17 +30,17 @@ for (var i = 3; i < process.argv.length; i++) {
 //TWITTER
 
 var readTwitter = function () {
-  var params = { ryzemo99: 'node.js' }
+  var params = { ryzemo99: 'node.js', count: 20 }
   client.get('statuses/user_timeline', params, function (error, tweets, response) {
     if (error) {
-      console.log("got error");
+      logText("got error");
     };
     twitterArray = tweets;
     for (var i = 0; i < twitterArray.length; i++) {
 
-      console.log("Time:" + twitterArray[i].created_at);
-      console.log("Text:" + twitterArray[i].text)
-      console.log('--------------------------------------');
+      logText("Time:" + twitterArray[i].created_at);
+      logText("Text:" + twitterArray[i].text)
+      logText('--------------------------------------');
     }
 
   });
@@ -47,24 +54,24 @@ var runSpotify = function (searchName) {
   spotify.
     search({ type: "track", query: searchName }, function (err, data) {
       if (err) {
-        console.log("Error: " + err);
+        logText("Error: " + err);
         return;
       }
 
       var song = data.tracks.items[0];
-      console.log("-----Artists-----");
-      console.log(song.artists[0].name);
+      logText("-----Artists-----");
+      logText(song.artists[0].name);
       //for (i=0; i <songs.artists.lenght; i++) {
 
       //}
-      console.log("-----Song Name-----");
-      console.log(song.name);
+      logText("-----Song Name-------");
+      logText(song.name);
 
-      console.log("----Preview Link-----");
-      console.log(song.preview_url);
+      logText("----Preview Link-----");
+      logText(song.preview_url);
 
-      console.log("-----Album-----")
-      console.log(song.album.name);
+      logText("-------Album----------")
+      logText(song.album.name);
 
 
     });
@@ -97,16 +104,20 @@ var runOMDB = function () {
     }
 
   }
+  if (movieName === "") {
+    movieName = "mr+nobody"
+
+  }
 
   // Then run a request to the OMDB API with the movie specified
   var queryUrl = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=trilogy";
 
   // This line is just to help us debug against the actual URL.
-  console.log(queryUrl);
+  logText(queryUrl);
 
   request(queryUrl, function (error, response, body) {
     if (error) {
-      console.log("Error: " + error);
+      logText("Error: " + error);
       return;
     }
 
@@ -115,40 +126,75 @@ var runOMDB = function () {
 
       // Parse the body of the site and recover just the imdbRating
       // (Note: The syntax below for parsing isn't obvious. Just spend a few moments dissecting it).
-      console.log("Title: " + JSON.parse(body).Title);
-      console.log("Release Year: " + JSON.parse(body).Year);
-      console.log("imdbRating: " + JSON.parse(body).imdbRating);
+      logText("Title: " + JSON.parse(body).Title);
+      logText("Release Year: " + JSON.parse(body).Year);
+      logText("imdbRating: " + JSON.parse(body).imdbRating);
 
       for (var i = 0; i < JSON.parse(body).Ratings.length; i++) {
         var rating = JSON.parse(body).Ratings[i];
         if (rating.Source === "Rotten Tomatoes") {
-          console.log("Rotten Tomatoes: " + rating.Value)
+          logText("Rotten Tomatoes: " + rating.Value)
         }
       }
 
-        console.log("Country where produced: " + JSON.parse(body).Country);
-        console.log("Language of the movie: " + JSON.parse(body).Language);
-        console.log("Plot of the movie: " + JSON.parse(body).Plot);
-        console.log("Actors in the movie: " + JSON.parse(body).Actors);
-      
+      logText("Country where produced: " + JSON.parse(body).Country);
+      logText("Language of the movie: " + JSON.parse(body).Language);
+      logText("Plot of the movie: " + JSON.parse(body).Plot);
+      logText("Actors in the movie: " + JSON.parse(body).Actors);
+
     }
   });
 }
 
 
+var runRandom = function () {
+//RANDOM 
 
-    //RANDOM 
+// fs is a core Node package for reading and writing files
 
-    if (cmdIn === "tweet") {
-      readTwitter();
-    } else if (cmdIn === "spotify") {
-      runSpotify(searchStr);
-    } else if (cmdIn === "omdb") {
-      runOMDB();
-    }else if (cmdIn==="random") {
-      runRandom ();
-    }
 
+// This block of code will read from the "movies.txt" file.
+// It's important to include the "utf8" parameter or the code will provide stream data (garbage)
+// The code will store the contents of the reading inside the variable "data"
+fs.readFile("random.txt", "utf8", function (error, data) {
+
+  // If the code experiences any errors it will log the error to the console.
+  if (error) {
+    return logText(error);
+  }
+
+  // We will then print the contents of data
+  logText(data);
+
+  // Then split it by commas (to make it more readable)
+  var dataArr = data.split(",");
+if (dataArr[0] === "spotify-this-song") {
+  runSpotify(dataArr[1]);
+}
+  // We will then re-display the content as an array for later use.
+  logText(dataArr);
+  
+
+})
+}
+
+
+
+
+  if (cmdIn === "tweet") {
+    readTwitter();
+  } else if (cmdIn === "spotify") {
+    runSpotify(searchStr);
+  } else if (cmdIn === "omdb") {
+    runOMDB();
+  } else if (cmdIn === "random") {
+    runRandom();
+  }
+
+
+  
+//write to log.txt
+  
 
 
 
@@ -183,7 +229,7 @@ var runOMDB = function () {
 // var queryUrl = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=trilogy";
 
 // // This line is just to help us debug against the actual URL.
-// console.log(queryUrl);
+// logText(queryUrl);
 
 // request(queryUrl, function (error, response, body) {
 
@@ -193,8 +239,8 @@ var runOMDB = function () {
 //     // Parse the body of the site and recover just the imdbRating
 //     // (Note: The syntax below for parsing isn't obvious. Just spend a few moments dissecting it).
 //     //list of console logs from movie site
-//     console.log("Release Year: " + JSON.parse(body).Year);
-//     console.log()
+//     logText("Release Year: " + JSON.parse(body).Year);
+//     logText()
 
 //     //   3. `node liri.js movie-this '<movie name here>'`
 
@@ -232,7 +278,7 @@ var runOMDB = function () {
 // // * If no song is provided then your program will default to "The Sign" by Ace of Base.
 
 
-//console.log("#1 = " + searchStr);
+//logText("#1 = " + searchStr);
 
 
 
@@ -278,6 +324,6 @@ var runOMDB = function () {
 //     break;
 
 //     default:
-//     console.log("{Please enter a command: my-tweets, spotify-this-song, movie-this, do-what-it-says}");
+//     logText("{Please enter a command: my-tweets, spotify-this-song, movie-this, do-what-it-says}");
 //   break;
 // 
